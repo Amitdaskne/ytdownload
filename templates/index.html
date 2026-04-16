@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AMIT YT DOWNLOADER</title>
+
+<style>
+body{
+margin:0;
+font-family:-apple-system;
+background:linear-gradient(135deg,#1e3c72,#2a5298);
+color:white;
+}
+
+.app{
+max-width:420px;
+margin:auto;
+padding:15px;
+}
+
+.card{
+background:rgba(255,255,255,0.1);
+backdrop-filter:blur(20px);
+padding:20px;
+border-radius:20px;
+}
+
+input,select,button{
+width:100%;
+padding:14px;
+margin:8px 0;
+border-radius:12px;
+border:none;
+}
+
+button{
+background:#00ffd5;
+color:black;
+font-weight:bold;
+}
+
+img{
+width:100%;
+border-radius:12px;
+margin-top:10px;
+}
+
+.progress{
+height:6px;
+background:#222;
+margin-top:10px;
+border-radius:10px;
+}
+
+#bar{
+height:100%;
+width:0%;
+background:#00ffd5;
+}
+
+#status{text-align:center;margin-top:10px}
+</style>
+
+</head>
+
+<body>
+
+<div class="app">
+<div class="card">
+
+<h2>⚡ AMIT YT DOWNLOADER</h2>
+
+<input type="text" id="url" placeholder="Paste link">
+
+<button onclick="getInfo()">FETCH</button>
+
+<div id="status"></div>
+<div id="preview"></div>
+
+<div id="qualityBox" style="display:none;">
+<select id="quality"></select>
+
+<select id="mode">
+<option value="video">Video</option>
+<option value="mp3">MP3</option>
+</select>
+
+<button onclick="startDownload()">DOWNLOAD</button>
+</div>
+
+<div class="progress"><div id="bar"></div></div>
+
+</div>
+</div>
+
+<script>
+
+function getInfo(){
+let url=document.getElementById("url").value;
+document.getElementById("status").innerText="Fetching...";
+
+fetch("/info",{
+method:"POST",
+headers:{"Content-Type":"application/x-www-form-urlencoded"},
+body:"url="+encodeURIComponent(url)
+})
+.then(r=>r.json())
+.then(d=>{
+document.getElementById("status").innerText="";
+document.getElementById("preview").innerHTML=`<img src="${d.thumbnail}"><p>${d.title}</p>`;
+
+let q=document.getElementById("quality");
+q.innerHTML="";
+d.formats.forEach(f=>{
+q.innerHTML+=`<option value="${f.id}">${f.quality}</option>`;
+});
+
+document.getElementById("qualityBox").style.display="block";
+});
+}
+
+function startDownload(){
+let url=document.getElementById("url").value;
+let format=document.getElementById("quality").value;
+let mode=document.getElementById("mode").value;
+
+document.getElementById("status").innerText="Processing...";
+
+fetch("/download",{
+method:"POST",
+headers:{"Content-Type":"application/x-www-form-urlencoded"},
+body:"url="+encodeURIComponent(url)+"&format="+format+"&mode="+mode
+})
+.then(r=>r.json())
+.then(d=>{
+document.getElementById("status").innerText="Done!";
+window.location.href="/getfile?path="+encodeURIComponent(d.file);
+});
+}
+
+</script>
+
+</body>
+</html>
